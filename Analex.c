@@ -5,13 +5,11 @@
 #include "Analex.h"
 
 
-int contLinha = 0;
-
 
 token AnalisadorLexico(FILE *FD){
 
 int estado = 0,cont = 0;
-int c;
+int c,comentario;
 token t;
 ID *aux;
 
@@ -314,7 +312,7 @@ ID *aux;
 				if(c == '*'){
 
 					estado = 25;
-
+					comentario = contLinha;
 				}else{
 
 					ungetc(c,FD);
@@ -330,6 +328,11 @@ ID *aux;
 
 				if(c == '*') estado = 26;
 				if(c== '\n') contLinha++;
+				if (feof(FD)){
+					printf("Erro na linha %d \n",comentario);
+					system("pause");
+					exit(-10);
+				}
 
 				break;
 
@@ -425,14 +428,10 @@ ID *aux;
 
 			case 44:
 
-				if((isprint(c)) && (c != '"') && (c != '\\')){
+				if((isprint(c)) && (c != '"') && (c != '\n')){
 
 					//CL[indice++] = c;
 					t.lexema[cont++] = c;
-
-				}else if(c == '\\'){
-
-					estado = 50;
 
 				}else if(c == '"'){
 
@@ -474,24 +473,6 @@ ID *aux;
 
 				break;
 
-			case 50:
-
-				if(c == 'n'){
-
-				}else if((isprint(c)) && (c != '"') && (c != '\\')){
-
-					//CL[indice++] = c;
-					t.lexema[cont++] = c;
-					estado = 44;
-				}else{
-
-					printf("erro na linha %d",contLinha);
-					system("pause");
-					exit(-3);
-
-				}
-
-				break;
 		}
 	}
 }
@@ -525,9 +506,9 @@ int main(){
 			if(t.cat == CT_INT) printf("<CT_I,%d> ",t.valor_I);
 			if(t.cat == CT_REAL) printf("<CT_R,%f> ",t.valor_R);
 			if(t.cat == SINAL){
-				
+
 				switch(t.codigo){
-					
+
 					case 11:
 						printf("<SN, ; > ");
 						break;
@@ -590,13 +571,13 @@ int main(){
 						break;
 				}
 			}
-			
+
 			if(t.cat == CT_C){
 
-				if(t.codigo == 0) printf("<CT_C,\\0> ");					
-				else if (t.codigo ==10) printf("<CT_C,\\n> ");					
+				if(t.codigo == 0) printf("<CT_C,\\0> ");
+				else if (t.codigo ==10) printf("<CT_C,\\n> ");
 				else printf("<CT_C,%c>",t.codigo);
-				
+
 			}
 			if(t.cat == CT_L) printf("<CT_L,%s> ",CL[t.codigo]);
 

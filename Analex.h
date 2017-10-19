@@ -1,14 +1,16 @@
 #define NumeroPR 11 //Utilizado para percorrer o vetor de PR
 
+int contLinha = 1;
+
 typedef enum {
-	IDENTIFICADOR = 0, 
-	PALAVRA_RES = 1, 
-	CT_INT = 2,			
-	CT_REAL = 3,	
+	IDENTIFICADOR = 0,
+	PALAVRA_RES = 1,
+	CT_INT = 2,
+	CT_REAL = 3,
 	SINAL = 4,
-	CT_C = 5,		
+	CT_C = 5,
 	FIM_ARQ = 6,
-	CT_L = 7 	
+	CT_L = 7
 
 }categoria;
 
@@ -35,12 +37,12 @@ typedef enum {
 	DIFERENTE = 28,
 	VIRGULA = 29,
 	NEGACAO = 30
-	
+
 }codigo;
 
 /*
 typedef enum{
-	
+
 	BARRA_N = 50,
 	BARRA_ZERO	= 51
 }caracter;*/
@@ -50,7 +52,7 @@ typedef struct Token{
 
 	categoria cat;
 	int codigo;		// ; + - * /
-	char digito[30]; // <= >= 
+	char digito[30]; // <= >=
 	char lexema[30]; //ID , PR
 	int valor_I; 	// valor inteiro
 	double valor_R;	// valor real
@@ -61,9 +63,9 @@ typedef struct Token{
 
 
 typedef struct Identificador{
-	
-	char lexema[30];	
-	struct Identificador *prox;	
+
+	char lexema[30];
+	struct Identificador *prox;
 }ID;
 
 ID *inicio = NULL;
@@ -73,14 +75,14 @@ ID *inicio = NULL;
 //**************Tabela de Palavras Reservadas***************
 
 typedef struct PalavraReservada{
-	
+
 	char lexema[30];
-	
+
 }PR;
 
-PR TabelaPR[]={	
-	
-	{.lexema = "semretorno"},	
+PR TabelaPR[]={
+
+	{.lexema = "semretorno"},
 	{.lexema = "caracter"},
 	{.lexema = "inteiro"},
 	{.lexema = "real"},
@@ -92,16 +94,16 @@ PR TabelaPR[]={
 	{.lexema = "para"},
 	{.lexema = "retorne"}
 };
-		
+
 //***********************************************************
 
 //**************Tabela de Constantes Literais****************
 
 /*
 typedef struct ConstanteLiteral{
-	
-	char string[250];	
-	struct ConstanteLiteral *prox;	
+
+	char string[250];
+	struct ConstanteLiteral *prox;
 }CL;
 
 CL *inicioCL = NULL;
