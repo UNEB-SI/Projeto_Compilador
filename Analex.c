@@ -529,64 +529,64 @@ int main(){
 				switch(t.codigo){
 					
 					case 11:
-						printf("<SN,';'> ");
+						printf("<SN, ; > ");
 						break;
 					case 12:
-						printf("<SN,'>'> ");
+						printf("<SN, > > ");
 						break;
 					case 13:
-						printf("<SN, '>=' > ");
+						printf("<SN, >= > ");
 						break;
 					case 14:
-						printf("<SN,'<'>");
+						printf("<SN, < >");
 						break;
 					case 15:
-						printf("<SN,'<='> ");
+						printf("<SN, <= > ");
 						break;
 					case 16:
-						printf("<SN,'='> ");
+						printf("<SN, = > ");
 						break;
 					case 17:
-						printf("<SN,'=='> ");
+						printf("<SN, == > ");
 						break;
 					case 18:
-						printf("<SN,'+'> ");
+						printf("<SN, + > ");
 						break;
 					case 19:
-						printf("<SN,'-'> ");
+						printf("<SN, - > ");
 						break;
 					case 20:
-						printf("<SN,'*'> ");
+						printf("<SN, * > ");
 						break;
 					case 21:
-						printf("<SN,'/'> ");
+						printf("<SN, / > ");
 						break;
 					case 22:
-						printf("<SN,'('> ");
+						printf("<SN, ( > ");
 						break;
 					case 23:
-						printf("<SN,')'> ");
+						printf("<SN, ) > ");
 						break;
 					case 24:
-						printf("<SN,'{'> ");
+						printf("<SN, { > ");
 						break;
 					case 25:
-						printf("<SN,'}'> ");
+						printf("<SN, } > ");
 						break;
 					case 26:
-						printf("<SN,'||'> ");
+						printf("<SN, || > ");
 						break;
 					case 27:
-						printf("<SN,'&&'> ");
+						printf("<SN, && > ");
 						break;
 					case 28:
-						printf("<SN,'!='> ");
+						printf("<SN, != > ");
 						break;
 					case 29:
-						printf("<SN,','> ");
+						printf("<SN, , > ");
 						break;
 					case 30:
-						printf("<SN,'!'> ");
+						printf("<SN, ! > ");
 						break;
 				}
 			}
