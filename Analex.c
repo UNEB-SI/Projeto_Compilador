@@ -4,19 +4,34 @@
 #include <ctype.h>
 #include "Analex.h"
 
+PR TabelaPR[]={
+
+	{.lexema = "semretorno"},
+	{.lexema = "caracter"},
+	{.lexema = "inteiro"},
+	{.lexema = "real"},
+	{.lexema = "booleano"},
+	{.lexema = "semparam"},
+	{.lexema = "se"},
+	{.lexema = "senao"},
+	{.lexema = "enquanto"},
+	{.lexema = "para"},
+	{.lexema = "retorne"},
+	{.lexema = "prototipo"}
+};
+
+int contLinha = 1;
+int indice = 0;
+
+void Analex(FILE *FD){
 
 
-token AnalisadorLexico(FILE *FD){
 
 int estado = 0,cont = 0;
 int c,comentario;
-token t;
-ID *aux;
+//ID *aux;
 
-	if(inicio == NULL){
-		inicio = (ID *) malloc(sizeof(ID)); //Necessário para criar uma tabela de Identificadores (Lista encadeada)
-		inicio->prox = NULL;
-	}
+t=tnext;
 
 	while(1){
 
@@ -50,12 +65,12 @@ ID *aux;
 				}else if(isalpha(c)){ //Letra
 
 					estado = 2;
-					t.lexema[cont++] = c;
+					tnext.lexema[cont++] = c;
 
 				}else if(isdigit(c)){ //Digito
 
 					estado = 4;
-					t.digito[cont++] = c;
+					tnext.digito[cont++] = c;
 
 				}else if(c == '<'){
 
@@ -67,27 +82,27 @@ ID *aux;
 
 				}else if(c == ';'){
 
-					t.cat = SINAL;
-					t.codigo = PTO_VIRGULA;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = PTO_VIRGULA;
+					return;
 
 				}else if(c == '+'){
 
-					t.cat = SINAL;
-					t.codigo = MAIS;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MAIS;
+					return;
 
 				}else if(c == '-'){
 
-					t.cat = SINAL;
-					t.codigo = MENOS;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MENOS;
+					return;
 
 				}else if(c == '*'){
 
-					t.cat = SINAL;
-					t.codigo = ASTERISCO;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = ASTERISCO;
+					return;
 
 				}else if(c == '='){
 
@@ -111,33 +126,33 @@ ID *aux;
 
 				}else if(c == '('){
 
-					t.cat = SINAL;
-					t.codigo = ABRE_PAR;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = ABRE_PAR;
+					return;
 
 				}else if(c == ')'){
 
-					t.cat = SINAL;
-					t.codigo = FECHA_PAR;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = FECHA_PAR;
+					return;
 
 				}else if(c == '{'){
 
-					t.cat = SINAL;
-					t.codigo = ABRE_CHAVE;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = ABRE_CHAVE;
+					return;
 
 				}else if(c == '}'){
 
-					t.cat = SINAL;
-					t.codigo = FECHA_CHAVE;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = FECHA_CHAVE;
+					return;
 
 				}else if(c == ','){
 
-					t.cat = SINAL;
-					t.codigo = VIRGULA;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = VIRGULA;
+					return;
 
 				}else if(c == 39){
 
@@ -146,8 +161,8 @@ ID *aux;
 				}else if(c == '"'){
 
 					estado = 44;
-					t.cat = CT_L;
-					t.codigo = indice;
+					tnext.cat = CT_L;
+					tnext.codigo = indice;
 
 				}else{
 
@@ -159,9 +174,9 @@ ID *aux;
 
 			case 1:
 
-				t.cat = FIM_ARQ;
-				t.codigo = 0;
-				return t;
+				tnext.cat = FIM_ARQ;
+				tnext.codigo = 0;
+				return;
 
 				break;
 
@@ -170,34 +185,35 @@ ID *aux;
 				if((isalpha(c)) || (c == '_') || (isdigit(c))){
 
 					estado = 2;
-					t.lexema[cont++] = c;
+					tnext.lexema[cont++] = c;
 
 				}else{
 
-					t.lexema[cont]='\0';
+					tnext.lexema[cont]='\0';
 					ungetc(c,FD);
 					int i;
 
 					for(i=0;i<NumeroPR;i++){
 
-						if(!(strcmp(t.lexema,TabelaPR[i].lexema))) {
+						if(!(strcmp(tnext.lexema,TabelaPR[i].lexema))) {
 
-							t.cat = PALAVRA_RES;
-							t.codigo = i;
+							tnext.cat = PALAVRA_RES;
+							tnext.codigo = i;
 
-							return t;
+							return;
 						}
 					}
 
+						/*
 					aux = inicio;
 
 
 					while (aux->prox != NULL){
 
-						if(strcmp(t.lexema,aux->lexema)==0){
+						if(strcmp(tnext.lexema,aux->lexema)==0){
 
-							t.cat = IDENTIFICADOR;
-							return t;
+							tnext.cat = IDENTIFICADOR;
+							return;
 						}
 						aux = aux->prox;
 					}
@@ -206,9 +222,12 @@ ID *aux;
 					aux = aux->prox;
 					aux->prox = NULL;
 
-					strcpy(aux->lexema,t.lexema);
-					t.cat = IDENTIFICADOR;
-					return t;
+					strcpy(aux->lexema,tnext.lexema);
+					tnext.cat = IDENTIFICADOR;
+					return;*/
+
+					tnext.cat = IDENTIFICADOR;
+					return;
 				}
 				break;
 
@@ -216,16 +235,16 @@ ID *aux;
 
 				if(isdigit(c)){ //se for numero
 					estado = 4;
-					t.digito[cont++] = c;
+					tnext.digito[cont++] = c;
 				}else if (c == '.'){
 					estado = 5;
-					t.digito[cont++] = c;
+					tnext.digito[cont++] = c;
 				}else{
 					ungetc(c,FD);
-					t.digito[cont] = '\0';
-					t.cat = CT_INT;
-					t.valor_I = atoi(t.digito);
-					return t;
+					tnext.digito[cont] = '\0';
+					tnext.cat = CT_INT;
+					tnext.valor_I = atoi(tnext.digito);
+					return;
 				}
 
 				break;
@@ -234,7 +253,7 @@ ID *aux;
 
 				if(isdigit(c)){
 					estado = 6;
-					t.digito[cont++] = c;
+					tnext.digito[cont++] = c;
 				}else{
 					printf("erro na linha %d",contLinha);
 					system("pause");
@@ -247,12 +266,12 @@ ID *aux;
 
 				if(isdigit(c)){
 					estado = 6;
-					t.digito[cont++] = c;
+					tnext.digito[cont++] = c;
 				}else{
 					ungetc(c,FD);
-					t.cat = CT_REAL;
-					t.valor_R = atof(t.digito);
-					return t;
+					tnext.cat = CT_REAL;
+					tnext.valor_R = atof(tnext.digito);
+					return;
 				}
 
 				break;
@@ -261,14 +280,14 @@ ID *aux;
 
 				if(c == '='){
 					estado = 11;
-					t.cat = SINAL;
-					t.codigo = MENOR_IGUAL;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MENOR_IGUAL;
+					return;
 				}else{
 					ungetc(c,FD);
-					t.cat = SINAL;
-					t.codigo = MENOR;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MENOR;
+					return;
 				}
 
 				break;
@@ -277,14 +296,14 @@ ID *aux;
 
 				if(c == '='){
 					estado = 11;
-					t.cat = SINAL;
-					t.codigo = MAIOR_IGUAL;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MAIOR_IGUAL;
+					return;
 				}else{
 					ungetc(c,FD);
-					t.cat = SINAL;
-					t.codigo = MAIOR;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = MAIOR;
+					return;
 				}
 
 				break;
@@ -293,16 +312,16 @@ ID *aux;
 
 				if(c == '='){
 
-					t.cat = SINAL;
-					t.codigo = IGUAL_IGUAL;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = IGUAL_IGUAL;
+					return;
 
 				}else{
 
 					ungetc(c,FD);
-					t.cat = SINAL;
-					t.codigo = IGUAL;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = IGUAL;
+					return;
 				}
 
 				break;
@@ -316,9 +335,9 @@ ID *aux;
 				}else{
 
 					ungetc(c,FD);
-					t.cat = SINAL;
-					t.codigo = BARRA;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = BARRA;
+					return;
 
 				}
 
@@ -350,9 +369,9 @@ ID *aux;
 
 				if(c == '|'){
 
-					t.cat = SINAL;
-					t.codigo = OU;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = OU;
+					return;
 				}else{
 					printf("erro na linha %d",contLinha);
 					system("pause");
@@ -366,9 +385,9 @@ ID *aux;
 
 					if(c == '&'){
 
-					t.cat = SINAL;
-					t.codigo = E;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = E;
+					return;
 				}else{
 					printf("erro na linha %d",contLinha);
 					system("pause");
@@ -382,28 +401,28 @@ ID *aux;
 
 				if(c == '='){
 
-					t.cat = SINAL;
-					t.codigo = DIFERENTE;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = DIFERENTE;
+					return;
 				}else{
 
 					ungetc(c,FD);
-					t.cat = SINAL;
-					t.codigo = NEGACAO;
-					return t;
+					tnext.cat = SINAL;
+					tnext.codigo = NEGACAO;
+					return;
 				}
 
 				break;
 
 			case 41:
 
-				if((isprint(c)) && ((c != 39) && (c != 92))){ // 92 é barra invertida
+				if((isprint(c)) && ((c != 39) && (c != 92))){ // 92 ï¿½ barra invertida
 
-					t.cat = CT_C;
-					t.codigo = c;
+					tnext.cat = CT_C;
+					tnext.codigo = c;
 					estado = 43;
 
-				} else if((c == '\\')&& ((c != 39))){ //39 é apostrofo
+				} else if((c == '\\')&& ((c != 39))){ //39 ï¿½ apostrofo
 				    estado = 47;
 				}else{
 					printf("erro na linha %d :[%c]",contLinha,c);
@@ -415,9 +434,9 @@ ID *aux;
 
 			case 43:
 
-				if(c == 39){ //Apóstrofo
+				if(c == 39){ //Apï¿½strofo
 
-					return t;
+					return;
 				}else{
 					printf("erro na linha %d",contLinha);
 					system("pause");
@@ -431,15 +450,15 @@ ID *aux;
 				if((isprint(c)) && (c != '"') && (c != '\n')){
 
 					//CL[indice++] = c;
-					t.lexema[cont++] = c;
+					tnext.lexema[cont++] = c;
 
 				}else if(c == '"'){
 
 					//CL[indice++] = '\0';
-					t.lexema[cont++] = '\0';
-					strcpy(CL[indice],t.lexema);
+					tnext.lexema[cont++] = '\0';
+					strcpy(CL[indice],tnext.lexema);
 					indice++;
-					return t;
+					return;
 
 				}else{
 					printf("erro na linha %d",contLinha);
@@ -453,14 +472,14 @@ ID *aux;
 
                 if(c == 'n'){
 
-                    t.cat = CT_C;
-					t.codigo = '\n';
+                    tnext.cat = CT_C;
+					tnext.codigo = '\n';
 					estado = 43;
 
 				}else if(c == '0'){
 
-					t.cat = CT_C;
-					t.codigo = '\0';
+					tnext.cat = CT_C;
+					tnext.codigo = '\0';
 					estado = 43;
 
                 }else{
@@ -476,118 +495,3 @@ ID *aux;
 		}
 	}
 }
-
-
-
-int main(){
-
-	char nome[25];
-   	FILE *fp;
-   	token t;
-
-
-	printf("Digite o nome do arquivo a ser lido\n");
-   	gets(nome);
-
-   fp = fopen(nome,"r");
-
-   if(fp == NULL){
-	   	printf("erro: arquivo inexistente");
-	   	exit(-5);
-   }
-
-
- 	do{
-
-		t = AnalisadorLexico(fp);
-
-			if(t.cat == IDENTIFICADOR) printf("<ID,%s> ",t.lexema);
-			if(t.cat == PALAVRA_RES) printf("<PR,%s> ",TabelaPR[t.codigo].lexema);
-			if(t.cat == CT_INT) printf("<CT_I,%d> ",t.valor_I);
-			if(t.cat == CT_REAL) printf("<CT_R,%f> ",t.valor_R);
-			if(t.cat == SINAL){
-
-				switch(t.codigo){
-
-					case 11:
-						printf("<SN, ; > ");
-						break;
-					case 12:
-						printf("<SN, > > ");
-						break;
-					case 13:
-						printf("<SN, >= > ");
-						break;
-					case 14:
-						printf("<SN, < >");
-						break;
-					case 15:
-						printf("<SN, <= > ");
-						break;
-					case 16:
-						printf("<SN, = > ");
-						break;
-					case 17:
-						printf("<SN, == > ");
-						break;
-					case 18:
-						printf("<SN, + > ");
-						break;
-					case 19:
-						printf("<SN, - > ");
-						break;
-					case 20:
-						printf("<SN, * > ");
-						break;
-					case 21:
-						printf("<SN, / > ");
-						break;
-					case 22:
-						printf("<SN, ( > ");
-						break;
-					case 23:
-						printf("<SN, ) > ");
-						break;
-					case 24:
-						printf("<SN, { > ");
-						break;
-					case 25:
-						printf("<SN, } > ");
-						break;
-					case 26:
-						printf("<SN, || > ");
-						break;
-					case 27:
-						printf("<SN, && > ");
-						break;
-					case 28:
-						printf("<SN, != > ");
-						break;
-					case 29:
-						printf("<SN, , > ");
-						break;
-					case 30:
-						printf("<SN, ! > ");
-						break;
-				}
-			}
-
-			if(t.cat == CT_C){
-
-				if(t.codigo == 0) printf("<CT_C,\\0> ");
-				else if (t.codigo ==10) printf("<CT_C,\\n> ");
-				else printf("<CT_C,%c>",t.codigo);
-
-			}
-			if(t.cat == CT_L) printf("<CT_L,%s> ",CL[t.codigo]);
-
-
-
-	}while(t.cat != 6);	//Chama o Analisador léxico até que ele retorne o código de EOF
-
-	fclose(fp);
-
-		return 0;
-}
-
-

@@ -1,6 +1,8 @@
-#define NumeroPR 11 //Utilizado para percorrer o vetor de PR
+#ifndef ANALEX
+#define ANALEX
+#define NumeroPR 12 //Utilizado para percorrer o vetor de PR
 
-int contLinha = 1;
+extern int contLinha;
 
 typedef enum {
 	IDENTIFICADOR = 0,
@@ -54,21 +56,17 @@ typedef struct Token{
 	int codigo;		// ; + - * /
 	char digito[30]; // <= >=
 	char lexema[30]; //ID , PR
+	 union {
 	int valor_I; 	// valor inteiro
 	double valor_R;	// valor real
+	};
 }token;
 
+token t,tnext;
 
 //**************Tabela de Identificadores*******************
 
 
-typedef struct Identificador{
-
-	char lexema[30];
-	struct Identificador *prox;
-}ID;
-
-ID *inicio = NULL;
 
 //***********************************************************
 
@@ -80,38 +78,34 @@ typedef struct PalavraReservada{
 
 }PR;
 
-PR TabelaPR[]={
 
-	{.lexema = "semretorno"},
-	{.lexema = "caracter"},
-	{.lexema = "inteiro"},
-	{.lexema = "real"},
-	{.lexema = "booleano"},
-	{.lexema = "semparam"},
-	{.lexema = "se"},
-	{.lexema = "senao"},
-	{.lexema = "enquanto"},
-	{.lexema = "para"},
-	{.lexema = "retorne"}
-};
+typedef enum {
+	semretorno,//0
+	caracter,//1
+	inteiro,//2
+	real,//3
+	booleano,//4
+	semparam,//5
+	se,//6
+	senao,//7
+	enquanto,//8
+	para,//9
+	retorne,//10
+	prototipo//11
+
+}palavraReserv;
 
 //***********************************************************
 
 //**************Tabela de Constantes Literais****************
 
-/*
-typedef struct ConstanteLiteral{
-
-	char string[250];
-	struct ConstanteLiteral *prox;
-}CL;
-
-CL *inicioCL = NULL;
-
-*/
-
-
 char CL[1000][30];
-int indice = 0;
+extern int indice;
 //***********************************************************
 
+
+//**************Declaracao de Funcoes************************
+
+void Analex(FILE *);
+//***********************************************************
+#endif
