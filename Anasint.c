@@ -474,7 +474,7 @@ void fator(FILE *FD){
             while(t.cat == SINAL && t.codigo == VIRGULA){
               expr(FD);
           }
-            Analex(FD);
+            //Analex(FD);
             if(t.cat == SINAL && t.codigo == FECHA_PAR){
               return;
             }else{
