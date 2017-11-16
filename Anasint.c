@@ -189,6 +189,7 @@ void cmd(FILE*FD){
           if(t.cat == SINAL && t.codigo == FECHA_PAR){
                   Analex(FD);
                     cmd(FD);
+
                           if(t.cat == PALAVRA_RES && t.codigo == senao){
                             Analex(FD);
                             cmd(FD);
@@ -295,6 +296,7 @@ void cmd(FILE*FD){
           Analex(FD);
 
       if(t.cat == SINAL && t.codigo == PTO_VIRGULA){
+        Analex(FD);
         return;
       }else{
         printf("Erro: ponto e virgula esperado na linha %d ",contLinha);
@@ -388,7 +390,7 @@ void cmd(FILE*FD){
                     }
   }else{
     printf("Erro na linha %d ",contLinha);
-    printf("%d %d ",tnext.cat, tnext.codigo);
+    printf("%d %d ",t.cat, t.codigo);
     system("pause");
     exit(-86);
   }
