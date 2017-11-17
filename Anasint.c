@@ -3,11 +3,11 @@
 #include <string.h>
 #include "Analex.h"
 #include "Anasint.h"
+#include "GerenciadorTS.h"
 
 char escopo = 'g';
 char categoria_simb ='v';
 int topo = -1;
-int tipos;
 
 
 void DesempilhaVariaveis(){

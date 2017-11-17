@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "Analex.h"
 #include "Anasint.h"
+#include "GerenciadorTS.h"
 
 int main(){
     int i=0;
@@ -23,11 +24,14 @@ int main(){
 	fclose(fp);
 
 	printf("\n Codigo sintaticamente correto! \n\n");
-	printf("============================TABELA=DE=SIMBOLOS========================\n");
-	for(i=0;i<topo+1;i++){
-        printf("Lexema: %s, Tipo: %d, Categoria: %c, Escopo: %c, Zombie?: %d\n",tabela_s[i].nome_var,tabela_s[i].tipo,tabela_s[i].categoria,tabela_s[i].escopo,tabela_s[i].zombie);
-	}
-	printf("A tabela de simbolos possui %d simbolos\n",topo+1);
-	system("pause");
+
+	char resultado;
+	printf("Deseja verificar a tabela de simbolos? (S/N) \n\n> ");
+	resultado = getchar();
+
+	if(resultado == 's' || resultado == 'S')
+            imprimir();
+
+
 	return 0;
 }
