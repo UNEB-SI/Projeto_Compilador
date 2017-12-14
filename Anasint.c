@@ -8,7 +8,6 @@
 char escopo = 'g';
 char categoria_simb ='v';
 int topo = -1;
-//char func_atual[30];
 char func_retorno[30];
 char label[6];
 int Retorno = 0,SemRetorno = 0;
@@ -20,7 +19,6 @@ int Amem=0;
 
 void criaLabel(){
   qtdLabel++;
-  int valor = qtdLabel;
   char aux[6];
   sprintf(aux,"%d",qtdLabel);
   strcpy(label, "L");
@@ -443,7 +441,6 @@ void checaTipoPrototipo(int posicao){
         if(tipos == tabela_s[posicao].tipo){
             if(tabela_s[posicao].nome_var[0] != '\0'){
                 if(strcmp(t.lexema,tabela_s[posicao].nome_var) != 0){
-                  //printf("%s %s",t.lexema,tabela_s[posicao].nome_var);
                   printf("Erro: Nome de parametro diferente do prototipo na linha %d\n",contLinha);
                   system("pause");
                   exit(-116);
@@ -462,7 +459,6 @@ void checaTipoPrototipo(int posicao){
   }
 }
 
-//proximo token apos abre parentese
 void tipos_param(FILE *FD){
 
 int contParam = 0,contAmem = 0;
@@ -488,7 +484,6 @@ prototipo = temPrototipo();
 				    }else{
 				      printf("id esperado na linha %d",contLinha);
 							system("pause");
-							//printf("\n %d %d",t.cat,t.codigo);
 							exit(-23);
 
 						}
@@ -559,11 +554,9 @@ prototipo = temPrototipo();
 
           }
   }else{
-    //  if(!(strcmp("principal",tabela_s[topo].nome_var) == 0)){
         printf("Erro: parametros esperados na linha %d\n",contLinha);
         system("pause");
         exit(-130);
-      //}
   }
 }
 
@@ -616,13 +609,12 @@ Analex(FD);
 }
 void cmd(FILE*FD){
   int tipoRetorno = 0;
-  char funcTop[30];
 
   if(t.cat == PALAVRA_RES && t.codigo == se){
     Analex(FD);
     if(t.cat == SINAL && t.codigo == ABRE_PAR){
         int tipoExprSe;
-        tipoExprSe = expr(FD); // printados aq
+        tipoExprSe = expr(FD);
         if (!verCompatibilidade(booleano,tipoExprSe)){
             printf("Erro na linha %d. A expressao deve ser do tipo booleano ou compativel\n",contLinha);
             system("pause");
@@ -635,24 +627,14 @@ void cmd(FILE*FD){
                   criaLabel();
                   strcpy(labelsalvo,label);
                   fprintf(FD1,"GOFALSE %s\n", label);
-                  //gofalse com o gera label x
-                    cmd(FD);// cmd gerado aq
+                    cmd(FD);
 
                     strcpy(labelsalvo1,selecao_completa());
-                    /*se o proximo token for senao:
-                    printa goto com novo label y guardando ele
-                    label com o x guardado
-                    if(tnext.cat == PALAVRA_RES && tnext.codigo == senao){
-                      criaLabel();
-                      strcpy(labelsalvo1,label);
-                      fprintf(FD1, "GOTO %s\n", label);
-                    }*/
                     fprintf(FD1,"LABEL %s\n", labelsalvo);
                           if(t.cat == PALAVRA_RES && t.codigo == senao){
                             Analex(FD);
-                            cmd(FD);// prints de cmd
+                            cmd(FD);
                             fprintf(FD1,"LABEL %s\n", labelsalvo1);
-                            //label com o valor y guardado
                           }
                           return;
           }else{
@@ -738,7 +720,6 @@ void cmd(FILE*FD){
                         system("pause");
                         exit(-307);
                     }
-//expr(FD);
                   }
 
                         criaLabel();
@@ -761,7 +742,6 @@ void cmd(FILE*FD){
                                               idTipo = tipoId();
                                               tipoAtrib = atrib(FD);
                                               verCompatibilidade(idTipo,tipoAtrib);
-                                              //atrib(FD);
                                             }else{
                                               printf("Identificador esperado na linha %d\n",contLinha);
                                               system("pause");
@@ -778,7 +758,6 @@ void cmd(FILE*FD){
                                               cmd(FD);
                                               fprintf(FD1,"GOTO %s\n",labelsalvo4);
                                               fprintf(FD1,"LABEL %s\n",labelsalvo2);
-                                              //Analex(FD);
                                               return;
                                             }else{
                                               printf("Erro: fecha parenteses esperado na linha %d\n",contLinha);
@@ -909,7 +888,6 @@ void cmd(FILE*FD){
                           }
                     }else if(tnext.cat == SINAL && tnext.codigo == IGUAL){
 
-                        //ehFuncao(); //Uma função não pode receber atribuição
                         char nome1[30];
                         strcpy(nome1,t.lexema);
 
@@ -917,7 +895,6 @@ void cmd(FILE*FD){
                         idTipo = tipoId();
                         tipoAtrib = atrib(FD);
                         verCompatibilidade(idTipo,tipoAtrib);
-                        //atrib(FD);
                         Analex(FD);
                             if(t.cat == SINAL && t.codigo == PTO_VIRGULA){
                               endRelativo(nome1);
@@ -962,8 +939,7 @@ int tipo;
 ehFuncao();
 Analex(FD);
     if(t.cat == SINAL && t.codigo == IGUAL){
-        //ehFuncao();
-        //Analex(FD);
+
         tipo = expr(FD);
         if(tipo != caracter && tipo != inteiro && tipo != booleano && tipo != real){
           printf("Erro na linha %d: Apenas variaveis dos tipos baicos podem receber atribuicoes",contLinha);
@@ -974,7 +950,6 @@ Analex(FD);
     }else{
         printf("Erro na linha %d: Esperado sinal igual",contLinha);
         system("pause");
-        //printf("\n %d %d ",tnext.cat,tnext.codigo);
         exit(-6);
     }
 
@@ -1000,7 +975,6 @@ int expr_simp(FILE *FD){
   int primTipo = 0,segTipo = 0, codigo = 0;
   char labelOr[6];
 
-  //Analex(FD);
 
   if((tnext.cat == SINAL)  && ((tnext.codigo == MAIS) || (tnext.codigo == MENOS))){
     Analex(FD);
@@ -1008,7 +982,7 @@ int expr_simp(FILE *FD){
 
   primTipo = termo(FD);
   printf("expr_simp\n PrimTipo: %d\n",primTipo);
-  if(verificaOr){
+  if(verificaOr()){
     strcpy(labelOr,label);
   }
 
@@ -1017,7 +991,7 @@ int expr_simp(FILE *FD){
     codigo = t.codigo;
     if(codigo == OU){
         fprintf(FD1,"COPY\n");
-        fprintf(FD1,"GOTRUE %s",labelOr);
+        fprintf(FD1,"GOTRUE %s\n",labelOr);
         fprintf(FD1,"POP\n");
     }
     segTipo = termo(FD);
@@ -1035,7 +1009,7 @@ int expr_simp(FILE *FD){
   }
   printf("Retorno de expr_simp\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
   if (codigo == OU){
-    fprintf(FD1,"LABEL %s", labelOr);
+    fprintf(FD1,"LABEL %s\n", labelOr);
   }
   return primTipo;
 }
@@ -1046,7 +1020,7 @@ int termo(FILE *FD){
  primTipo = fator(FD);
  printf("Termo\n PrimTipo: %d\n",primTipo);
 
-  if(verificaAnd){
+  if(verificaAnd()){
     strcpy(labelAnd,label);
   }
   while((tnext.cat == SINAL) && ((tnext.codigo == ASTERISCO) || (tnext.codigo == BARRA) || (tnext.codigo == E))){
@@ -1072,13 +1046,13 @@ int termo(FILE *FD){
   }
   printf("Retorno de Termo\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
   if (codigo == E){
-    fprintf(FD1,"LABEL %s", labelAnd);
+    fprintf(FD1,"LABEL %s\n", labelAnd);
   }
   return primTipo;
 }
 
 int fator(FILE *FD){
-  int tipo = 0, param =0, proxParam = 0,qtdParam = 0,contParam = 0;
+  int tipo = 0, param =0, qtdParam = 0,contParam = 0;
   char funcAtl[30],labelneg[7], labelneg1[7];
   Analex(FD);
 
@@ -1095,7 +1069,6 @@ int fator(FILE *FD){
       fprintf(FD1, "AMEM 1\n");
       Amem++;
       qtdParam = contaQtdParam();
-    //  printf("===============QTD========================: %d\n",qtdParam);
       Analex(FD);
           if(tnext.cat == SINAL && tnext.codigo == FECHA_PAR){
               Analex(FD);
@@ -1118,7 +1091,6 @@ int fator(FILE *FD){
               }
               Analex(FD);
             }
-            //Analex(FD);
             if(t.cat == SINAL && t.codigo == FECHA_PAR){
               verificaQtdParam(qtdParam,contParam);
               fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl));
@@ -1215,7 +1187,7 @@ fprintf(FD1,"INIP\n");
 
                    InsereTabela();
                    if(categoria_simb == 'f'){
-                     InsereLabelFunc(labelFunc); //lembrar de adicionar o labelSimb ao .h
+                     InsereLabelFunc(labelFunc);
                    }
 			       Analex(FD);
 
@@ -1322,15 +1294,7 @@ fprintf(FD1,"INIP\n");
 																													escopo = 'g';
                                                         fprintf(FD1,"DMEM %d\n",Amem);
                                                         Amem = 0;
-                                                          /* Trecho que verifica se uma funcao com tipo tem retorno
-                                                            if((SemRetorno == 0) && (Retorno == 0)){
-                                                              printf("Retorno da funcao esperado na linha %d\n",contLinha);
-                                                              system("pause");
-                                                              exit(-135);
-                                                            }*/
-                                                          //  if(Retorno == 0 ){
                                                               fprintf(FD1, "RET 1,%d\n",contParametro);
-                                                          //  }
                                                           contParametro = 0;
                                                           Retorno = 0;
 
@@ -1346,13 +1310,11 @@ fprintf(FD1,"INIP\n");
 			                                  }else{
 			                                   	printf("abre chave esperado na linha %d ",contLinha);
 																					system("pause");
-																					//printf("\n %d %d",t.cat,t.codigo);
 																					exit(-15);
 			                                  }
                           }else{
                             printf("fecha par esperado na linha %d ",contLinha);
                             system("pause");
-                            //printf("\n %d %d",t.cat,t.codigo);
                             exit(-110);
                           }
 

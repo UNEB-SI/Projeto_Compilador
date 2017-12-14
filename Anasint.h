@@ -22,6 +22,29 @@ int expr_simp(FILE *);
 int termo(FILE *);
 int fator(FILE *);
 int op_rel(FILE *);
+char * selecao_completa();
+void criaLabel();
+int verificaAnd();
+int verificaOr();
+char * buscaLabelFunc(char []);
+void InsereLabelFunc(char[]);
+void codigo_oprel(int );
+void endRelativo(char []);
+void procuraPrincipal();
+void ehFuncao();
+int verificaSemRetorno();
+int tipoId();
+void funcTopo();
+int contaQtdParam();
+void verificaQtdParam(int , int );
+void verCompatibilidadeParam(int , int , char[]);
+int tipoFunc(char []);
+int verCompatibilidade(int , int );
+void DesempilhaVariaveis();
+void verificaRedeclaracao();
+void InsereTabela();
+int temPrototipo();
+void checaTipoPrototipo(int );
 
 /*Tabela de símbolos */
 
