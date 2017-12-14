@@ -6,19 +6,22 @@ extern token t, tnext;
 extern char escopo;
 extern int contLinha;
 extern int topo;
+extern int Retorno;
+extern int SemRetorno;
 int tipoFuncao;
+FILE *FD1;
 
 /* Assinaturas de funcoes  */
 void Prog(FILE *);
 void tipos_param(FILE *);
 void tipos_p_opc(FILE *);
 void cmd(FILE *);
-void atrib(FILE *);
-void expr(FILE *);
-void expr_simp(FILE *);
-void termo(FILE *);
-void fator(FILE *);
-void op_rel(FILE *);
+int atrib(FILE *);
+int expr(FILE *);
+int expr_simp(FILE *);
+int termo(FILE *);
+int fator(FILE *);
+int op_rel(FILE *);
 
 /*Tabela de símbolos */
 
@@ -28,9 +31,10 @@ typedef struct TabelaSimbolos{
 	char categoria;
 	char escopo;
 	int zombie;
+	int free;
+	char labelSimb[7];
 }TS;
 
 TS tabela_s[1000];
-
 
 #endif // ANASINT
