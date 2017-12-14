@@ -13,7 +13,7 @@ int main(){
    	gets(nome);
 
    fp = fopen(nome,"r");
-
+   FD1 = fopen ("codigoObjeto.obj","w");
    if(fp == NULL){
 	   	printf("erro: arquivo inexistente");
 	   	exit(-5);
@@ -22,6 +22,7 @@ int main(){
 	Prog(fp);
 
 	fclose(fp);
+  fclose(FD1);
 
 	printf("\n Codigo sintaticamente correto! \n\n");
 
