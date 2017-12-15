@@ -6,11 +6,14 @@
 #include "GerenciadorTS.h"
 
 void imprimir(){
-    int i;
+    int i,cont;
 	printf("\n============================TABELA=DE=SIMBOLOS========================\n");
 	for(i=0;i<topo+1;i++){
-        printf("Lexema: %s, Tipo: %d, Categoria: %c, Escopo: %c, Zombie?: %d\n",tabela_s[i].nome_var,tabela_s[i].tipo,tabela_s[i].categoria,tabela_s[i].escopo,tabela_s[i].zombie);
+        if(tabela_s[i].free == 0){
+          printf("Lexema: %s, Tipo: %d, Categoria: %c, Escopo: %c, Zombie?: %d\n",tabela_s[i].nome_var,tabela_s[i].tipo,tabela_s[i].categoria,tabela_s[i].escopo,tabela_s[i].zombie);
+          cont++;
+        }
 	}
-	printf("\n A tabela de simbolos possui %d simbolos\n",topo+1);
+	printf("\n A tabela de simbolos possui %d simbolos\n",cont);
 	system("pause");
 }

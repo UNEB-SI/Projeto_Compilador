@@ -441,6 +441,7 @@ void checaTipoPrototipo(int posicao){
 
   if(tabela_s[posicao].categoria == 'r'){
         if(tipos == tabela_s[posicao].tipo){
+            tabela_s[posicao].free = 1;
             if(tabela_s[posicao].nome_var[0] != '\0'){
                 if(strcmp(t.lexema,tabela_s[posicao].nome_var) != 0){
                   GerenciadorErros(NOME_PAR_DIF);
