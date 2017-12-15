@@ -39,6 +39,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="Anasint.h" />
+		<Unit filename="GerenciadorErros.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="GerenciadorErros.h" />
 		<Unit filename="GerenciadorTS.c">
 			<Option compilerVar="CC" />
 		</Unit>

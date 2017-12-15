@@ -1,4 +1,4 @@
-#ifndef Gerenciador
+#ifndef GerenciadorTS
 
 extern char escopo;
 extern char categoria_simb;

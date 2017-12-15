@@ -24,7 +24,7 @@ int main(){
 	fclose(fp);
   fclose(FD1);
 
-	printf("\n Codigo sintaticamente correto! \n\n");
+	printf("\n Codigo sintatica e semanticamente correto! \n\n");
 
 	char resultado;
 	printf("Deseja verificar a tabela de simbolos? (S/N) \n\n> ");

@@ -4,6 +4,7 @@
 #include "Analex.h"
 #include "Anasint.h"
 #include "GerenciadorTS.h"
+#include "GerenciadorErros.h"
 
 char escopo = 'g';
 char categoria_simb ='v';
@@ -52,14 +53,13 @@ int verificaOr(){
   return 0;
 }
 
-char * buscaLabelFunc(char nomeFuncBuscada[30]){
+char * buscaLabelFunc(char nomeFuncBuscada[30], char cat){
   int Aux = topo;
     for(Aux;Aux>=0;Aux--){
-      if(strcmp(tabela_s[Aux].nome_var,nomeFuncBuscada) == 0 && (tabela_s[Aux].categoria == 'f')){
+      if((strcmp(tabela_s[Aux].nome_var,nomeFuncBuscada) == 0) && (tabela_s[Aux].categoria == cat)){
         return tabela_s[Aux].labelSimb;
       }
     }
-    printf("Atencao. Label nao encontrado\n");
     return "\0";
 }
 
@@ -207,9 +207,7 @@ int Aux = topo;
             return;
           }
     }
-    printf("Erro na linha %d. Funcao principal nao encontrada\n",contLinha);
-    system("pause");
-    exit(-141);
+    GerenciadorErros(ERROPRINCIPAL);
 }
 
 void ehFuncao(){ //Função que verifica se um ID é uma função. Se for, indica erro, senão, simplesmente retorna.
@@ -217,9 +215,7 @@ void ehFuncao(){ //Função que verifica se um ID é uma função. Se for, indic
     for(Aux;Aux>=0;Aux--){
         if((strcmp(t.lexema,tabela_s[Aux].nome_var) == 0)){
           if(tabela_s[Aux].categoria == 'f'){
-            printf("Erro na linha %d. Funcao nao pode receber atribuicao\n",contLinha);
-            system("pause");
-            exit(-140);
+            GerenciadorErros(ERRO_FUNC_ATRIB);
           }else{
             return;
           }
@@ -239,9 +235,7 @@ int verificaSemRetorno(){ //Verifica se uma função é sem retorno e retorna tr
           }
         }
       }
-      printf("Erro na linha %d. Funcao nao declarada\n",contLinha);
-      system("pause");
-      exit(-139);
+      GerenciadorErros(FUNCAO_N_DECLARADA);
 }
 
 int tipoId(){
@@ -251,9 +245,7 @@ int tipoId(){
         return tabela_s[i].tipo;
     }
   }
-  printf("Erro na linha %d. Variavel nao declarada\n",contLinha);
-  system("pause");
-  exit(-303);
+  GerenciadorErros(VAR_N_DECLARADA);
 }
 
 void funcTopo(){
@@ -264,9 +256,7 @@ void funcTopo(){
         return;
     }
   }
-  printf("Erro na linha %d. Nao ha funcao no topo\n",contLinha);
-  system("pause");
-  exit(-303);
+    GerenciadorErros(FUNCAOTOPO);
 }
 
 int contaQtdParam(){
@@ -279,22 +269,47 @@ int contaQtdParam(){
         }
     }
     if(!strcmp(tabela_s[j-1].nome_var,t.lexema) == 0){
-      printf("Erro na linha %d. Funcao %s nao declarada\n",contLinha,t.lexema);
-      system("pause");
-      exit(-301);
+      GerenciadorErros(FUNCAO_N_DECLARADA);
     }
     while(tabela_s[j].categoria == 'p' || tabela_s[j].categoria == 'r'){
+        if(tabela_s[j].categoria == 'r' && tabela_s[j].tipo == 5){
+            cont = 0;
+            break;
+        }
         cont++;
         j++;
     }
     return cont;
 }
 
+int contaQtdVarLocais(char nomeFunc[]){
+    int i =0, cont = 0, j =0;
+    for(i=topo+1; i>=0; i--){
+      if(strcmp(tabela_s[i].nome_var,nomeFunc) == 0 &&
+        (tabela_s[i].categoria == 'f')){
+            j = i+1;
+            break;
+        }
+    }
+    if(!strcmp(tabela_s[j-1].nome_var,nomeFunc) == 0){
+      GerenciadorErros(FUNCAO_N_DECLARADA);
+    }
+    while(tabela_s[j].categoria == 'p' ){
+        j++;
+    }
+
+    while(tabela_s[j].categoria == 'v' && tabela_s[j].escopo == 'l'){
+        cont++;
+        j++;
+    }
+
+    return cont;
+}
+
+
 void verificaQtdParam(int paramFunc, int qtdPassada){
     if(!(paramFunc == qtdPassada)) {
-      printf("Erro na linha %d. Quantidade de parametros incompativel. Esperado %d parametros. Funcao chamada com %d\n",contLinha,paramFunc,qtdPassada);
-      system("pause");
-      exit(-303);
+      GerenciadorErros(QTDPARAM_INCOMPATIVEL);
     }
 }
 
@@ -303,12 +318,8 @@ void verCompatibilidadeParam(int tipoParam, int saltos, char func_atual[]){
   for(i=0;i<topo+1;i++){
       if(strcmp(tabela_s[i].nome_var,func_atual) == 0 &&
         tabela_s[i].categoria == 'f'){
-          printf("Nome do par: %s,Tipo: %d\n", tabela_s[i+saltos].nome_var,tabela_s[i+saltos].tipo);
-          printf("Tipo do parametro comparado = %d\n",tipoParam);
           if ((!verCompatibilidade(tabela_s[i+saltos].tipo,tipoParam)) && tabela_s[i+saltos].categoria == 'p'){
-            printf("Erro na linha %d. Tipo do parametro incompativel\n",contLinha);
-            system("pause");
-            exit(-305);
+            GerenciadorErros(TIPOPARAM_INCOMPATIVEL);
           }
           else
             break;
@@ -321,13 +332,10 @@ int tipoFunc(char nomeFunc[]){
   for(i=0;i<topo+1;i++){
       if(strcmp(tabela_s[i].nome_var,nomeFunc) == 0 &&
         (tabela_s[i].categoria == 'f' || tabela_s[i].categoria == 'o')){
-          printf("%d: %s, Tipo: %d\n",i,tabela_s[i].nome_var,tabela_s[i].tipo);
           return tabela_s[i].tipo;
         }
   }
-  printf("Erro na linha %d. Funcao %s nao declarada\n",contLinha,nomeFunc);
-  system("pause");
-  exit(-301);
+  GerenciadorErros(FUNCAO_N_DECLARADA);
 
 }
 
@@ -356,14 +364,9 @@ int verCompatibilidade(int primTipo, int segTipo){
   }
 
   if(segTipo == 0){
-    printf("Erro na linha %d. a funcao deveria retornar um valor\n",contLinha);
-    system("pause");
-    exit(-308);
+    GerenciadorErros(FUNC_RET_VALOR);
   }
-  printf("Erro na linha %d. Tipos incompativeis\n",contLinha);
-  printf("Primeiro tipo: %d\nSegundo tipo:%d\n",primTipo,segTipo);
-  system("pause");
-  exit(-302);
+  GerenciadorErros(TIPO_INCOMPATIVEL);
 }
 
 void DesempilhaVariaveis(){
@@ -373,6 +376,11 @@ int aux = topo;
     while (1){
 
           if (tabela_s[aux].categoria == 'v'){
+            strcpy(tabela_s[aux].nome_var,"\0");
+            tabela_s[aux].tipo = 99;
+            tabela_s[aux].categoria = '\0';
+            tabela_s[aux].escopo = '\0';
+            tabela_s[aux].zombie = 0;
             topo --;
             aux --;
           }else if(tabela_s[aux].categoria == 'p'){
@@ -389,18 +397,12 @@ void verificaRedeclaracao(){
     for(Aux;Aux>=0;Aux--){
         if((strcmp(t.lexema,tabela_s[Aux].nome_var) == 0) && (tabela_s[Aux].escopo == escopo) && (tabela_s[Aux].zombie == 0) && (tabela_s[Aux].free == 0) && (tabela_s[Aux].tipo != semparam) && (t.lexema[0] != '\0') && (tabela_s[Aux].categoria != 'r')){
             if(tabela_s[Aux].categoria != 'o'){
-              printf("Erro: Redeclaracao na linha %d\n",contLinha);
-              system("pause");
-              exit(-113);
+              GerenciadorErros(REDECLARACAO);
             }else if (categoria_simb == 'o'){
-              printf("Erro: Redeclaracao de prototipo na linha %d\n",contLinha);
-              system("pause");
-              exit(-114);
+              GerenciadorErros(REDECLARACAO_PROTO);
             }else{
                 if(tabela_s[Aux].tipo != tipos){
-                  printf("Erro: Tipo de funcao diferente do esperado na linha %d\n",contLinha);
-                  system("pause");
-                  exit(-115);
+                  GerenciadorErros(TIPO_FUNC_DIF);
                 }
               tabela_s[Aux].free = 1;
               return;
@@ -441,30 +443,23 @@ void checaTipoPrototipo(int posicao){
         if(tipos == tabela_s[posicao].tipo){
             if(tabela_s[posicao].nome_var[0] != '\0'){
                 if(strcmp(t.lexema,tabela_s[posicao].nome_var) != 0){
-                  printf("Erro: Nome de parametro diferente do prototipo na linha %d\n",contLinha);
-                  system("pause");
-                  exit(-116);
+                  GerenciadorErros(NOME_PAR_DIF);
                 }
             }
 
         }else{
-          printf("Erro: Tipo diferente do esperado na linha %d\n",contLinha);
-          system("pause");
-          exit(-145);
+          GerenciadorErros(TIPO_DIF);
         }
   }else{
-    printf("Erro: qtd de parametros superior ao prototipo na linha %d\n",contLinha);
-    system("pause");
-    exit(-120);
+    GerenciadorErros(QTDPARAM_INCOMPATIVEL);
   }
 }
 
 void tipos_param(FILE *FD){
 
 int contParam = 0,contAmem = 0;
-int prototipo;
+int prototipo = 0;
 prototipo = temPrototipo();
-
 
   if((t.cat == PALAVRA_RES) &&  ((t.codigo == caracter) ||  (t.codigo == inteiro) ||   (t.codigo == real)||  (t.codigo == booleano))){
   	//proximo token apos palavra reservada
@@ -482,10 +477,7 @@ prototipo = temPrototipo();
 							InsereTabela();
 				      Analex(FD);
 				    }else{
-				      printf("id esperado na linha %d",contLinha);
-							system("pause");
-							exit(-23);
-
+              GerenciadorErros(ID_ESPERADO);
 						}
 
 				    if (t.cat == SINAL && t.codigo == VIRGULA){
@@ -507,9 +499,7 @@ prototipo = temPrototipo();
                                     contParametro = contParam;
                                     contParam = contParam + prototipo + 1;
                                       if(tabela_s[contParam].categoria == 'r'){
-                                        printf("Erro: Menos parametros do que declarados anteriormente na linha %d\n",contLinha);
-                                        system("pause");
-                                        exit(-121);
+                                        GerenciadorErros(QTDPARAM_INCOMPATIVEL);
                                       }
                                       fprintf(FD1,"AMEM %d\n",contAmem);
                                       Amem = Amem + contAmem;
@@ -517,15 +507,10 @@ prototipo = temPrototipo();
 																	}
 
 														}else{
-															printf("id esperado na linha %d\n",contLinha);
-															system("pause");
-															printf("\n %d %d",t.cat,t.codigo);
-															exit(-24);
+                              GerenciadorErros(ID_ESPERADO);
 														}
 											}else{
-												printf("palavra reservada esperada");
-												system("pause");
-												exit(-26);
+                        GerenciadorErros(PR_ESPERADO);
 											}
 							    }
 
@@ -548,15 +533,10 @@ prototipo = temPrototipo();
       				Analex(FD);
       						return;
           }else{
-                printf("Erro: Funcao semparam contem parametros na linha %d\n",contLinha);
-                system("pause");
-                exit(-144);
-
+                GerenciadorErros(FUNCAO_SEMPARAM_PAR);
           }
   }else{
-        printf("Erro: parametros esperados na linha %d\n",contLinha);
-        system("pause");
-        exit(-130);
+        GerenciadorErros(PARAM_ESPERADO);
   }
 }
 
@@ -587,9 +567,7 @@ Analex(FD);
                       tipos = t.codigo;
 
 									}else{
-										printf("Erro na linha %d\n", contLinha);
-										system("pause");
-										exit(-10);
+                    GerenciadorErros(ERRO_LINHA);
 									}
 							}else{
                 break;
@@ -602,9 +580,7 @@ Analex(FD);
 		Analex(FD);
 
 	}else{
-		printf("Erro: Parametros esperados na linha %d\n",contLinha);
-		system("pause");
-		exit(-12);
+    GerenciadorErros(PARAM_ESPERADO);
 	}
 }
 void cmd(FILE*FD){
@@ -616,9 +592,7 @@ void cmd(FILE*FD){
         int tipoExprSe;
         tipoExprSe = expr(FD);
         if (!verCompatibilidade(booleano,tipoExprSe)){
-            printf("Erro na linha %d. A expressao deve ser do tipo booleano ou compativel\n",contLinha);
-            system("pause");
-            exit(-307);
+            GerenciadorErros(EXPR_BOOL);
         }
         Analex(FD);
           if(t.cat == SINAL && t.codigo == FECHA_PAR){
@@ -638,14 +612,10 @@ void cmd(FILE*FD){
                           }
                           return;
           }else{
-            printf("Erro: fecha parenteses esperado na linha %d\n",contLinha);
-            system("pause");
-            exit(-72);
+            GerenciadorErros(FECHAPAR_ESPERADO);
           }
     }else{
-      printf("Erro: Abre parenteses esperado na linha %d\n",contLinha);
-      system("pause");
-      exit(-71);
+        GerenciadorErros(ABREPAR_ESPERADO);
     }
 
   }else if(t.cat == PALAVRA_RES && t.codigo == enquanto){
@@ -658,11 +628,8 @@ void cmd(FILE*FD){
         int tipoExprEnquanto;
         tipoExprEnquanto = expr(FD);
         if (!verCompatibilidade(booleano,tipoExprEnquanto)){
-            printf("Erro na linha %d. A expressao deve ser do tipo booleano ou compativel\n",contLinha);
-            system("pause");
-            exit(-307);
+            GerenciadorErros(EXPR_BOOL);
         }
-        //expr(FD);
         Analex(FD);
             if(t.cat == SINAL && t.codigo == FECHA_PAR){
               Analex(FD);
@@ -675,18 +642,14 @@ void cmd(FILE*FD){
               return;
 
             }else{
-              printf("Erro: fecha parenteses esperado na linha %d\n",contLinha);
-              system("pause");
-              exit(-74);
+              GerenciadorErros(FECHAPAR_ESPERADO);
             }
     }else{
-      printf("Erro: Abre parenteses esperado na linha %d\n",contLinha);
-      system("pause");
-      exit(-73);
+      GerenciadorErros(ABREPAR_ESPERADO);
     }
 
   }else if(t.cat == PALAVRA_RES && t.codigo == para){
-    char labelsalvo1[6],labelsalvo2[6],labelsalvo3[6],labelsalvo4[6];
+    char labelsalvo1[6],labelsalvo2[6],labelsalvo3[6],labelsalvo4[6],nomeId[30],nomeId2[30];
     Analex(FD);
     if(t.cat == SINAL && t.codigo == ABRE_PAR){
 
@@ -694,13 +657,14 @@ void cmd(FILE*FD){
           Analex(FD);
             if(t.cat == IDENTIFICADOR){
               int tipoAtrib, idTipo;
+              strcpy(nomeId,t.lexema);
               idTipo = tipoId();
               tipoAtrib = atrib(FD);
               verCompatibilidade(idTipo,tipoAtrib);
+              endRelativo(nomeId);
+              fprintf(FD1,"STOR %d,%d\n",m,n);
             }else{
-              printf("Identificador esperado na linha %d\n",contLinha);
-              system("pause");
-              exit(-76);
+              GerenciadorErros(ID_ESPERADO);
             }
 
         }
@@ -716,10 +680,11 @@ void cmd(FILE*FD){
                     int tipoExprPara;
                     tipoExprPara = expr(FD);
                     if (!verCompatibilidade(booleano,tipoExprPara)){
-                        printf("Erro na linha %d. A expressao deve ser do tipo booleano ou compativel\n",contLinha);
-                        system("pause");
-                        exit(-307);
+                        GerenciadorErros(EXPR_BOOL);
                     }
+                  }
+                  else{
+                    fprintf(FD1,"PUSH 1\n");
                   }
 
                         criaLabel();
@@ -739,13 +704,14 @@ void cmd(FILE*FD){
                                       Analex(FD);
                                             if(t.cat == IDENTIFICADOR){
                                               int tipoAtrib, idTipo;
+                                              strcpy(nomeId2,t.lexema);
                                               idTipo = tipoId();
                                               tipoAtrib = atrib(FD);
                                               verCompatibilidade(idTipo,tipoAtrib);
+                                              endRelativo(nomeId2);
+                                              fprintf(FD1,"STOR %d,%d\n",m,n);
                                             }else{
-                                              printf("Identificador esperado na linha %d\n",contLinha);
-                                              system("pause");
-                                              exit(-77);
+                                            GerenciadorErros(ID_ESPERADO);
                                             }
                                   }
 
@@ -760,37 +726,28 @@ void cmd(FILE*FD){
                                               fprintf(FD1,"LABEL %s\n",labelsalvo2);
                                               return;
                                             }else{
-                                              printf("Erro: fecha parenteses esperado na linha %d\n",contLinha);
-                                              system("pause");
-                                              exit(-75);
+                                              GerenciadorErros(FECHAPAR_ESPERADO);
                                             }
                       }else{
-                        printf("Erro: ponto e virgula esperado na linha %d\n",contLinha);
-                        system("pause");
-                        exit(-78);
+                        GerenciadorErros(PTOVIRG_ESPERADO);
                       }
               }else{
-                printf("Erro: ponto e virgula esperado na linha %d\n",contLinha);
-                system("pause");
-                exit(-77);
+                GerenciadorErros(PTOVIRG_ESPERADO);
               }
     }else{
-      printf("Erro: Abre parenteses esperado na linha %d\n",contLinha);
-      system("pause");
-      exit(-76);
+      GerenciadorErros(ABREPAR_ESPERADO);
     }
   }else if(t.cat == PALAVRA_RES && t.codigo == retorne){
       Retorno = 1;
       if(SemRetorno == 1 && !(tnext.cat == SINAL && tnext.codigo == PTO_VIRGULA)){
-        printf("Erro: funcao declarada como semretorno. Retorne encontrado na linha %d\n",contLinha);
-        system("pause");
-        exit(-136);
+        GerenciadorErros(FUNCAO_SEMR_R);
       }
 
             if(tnext.cat == SINAL && tnext.codigo == PTO_VIRGULA){
               Analex(FD);
               Analex(FD);
-              fprintf(FD1, "DMEM %d\n",Amem);
+              funcTopo();
+              fprintf(FD1, "DMEM %d\n",contaQtdVarLocais(func_retorno));
               fprintf(FD1, "RET 1,%d\n",contParametro);
               return;
             }
@@ -800,22 +757,19 @@ void cmd(FILE*FD){
           int funcTipo = tipoFunc(func_retorno);
           verCompatibilidade(tipoRetorno,funcTipo);
       }else{
-        printf("Erro na linha %d: A funcao deve possuir um valor de retorno.\n",contLinha);
-        system("pause");
-        exit(-137);
+        GerenciadorErros(FUNCAO_RETORNO);
       }
           Analex(FD);
 
       if(t.cat == SINAL && t.codigo == PTO_VIRGULA){
         Analex(FD);
+        funcTopo();
         fprintf(FD1, "STOR 1,%d\n",-3-contParametro);
-        fprintf(FD1, "DMEM %d\n",Amem);
+        fprintf(FD1, "DMEM %d\n",contaQtdVarLocais(func_retorno));
         fprintf(FD1, "RET 1,%d\n",contParametro);
         return;
       }else{
-        printf("Erro: ponto e virgula esperado na linha %d\n",contLinha);
-        system("pause");
-        exit(-79);
+        GerenciadorErros(PTOVIRG_ESPERADO);
       }
 
   }else if(t.cat == SINAL && t.codigo == ABRE_CHAVE){
@@ -837,9 +791,7 @@ void cmd(FILE*FD){
                   char funcaoAt[30];
                   if(tnext.cat == SINAL && tnext.codigo == ABRE_PAR){
                         if(verificaSemRetorno() == 0){
-                          printf("Erro na linha %d: a funcao %s deve ser do tipo semretorno. \n",contLinha,t.lexema);
-                          system("pause");
-                          exit(-138);
+                          GerenciadorErros(FUNCAO_SEMRETORNO);
                         }
                         strcpy(funcaoAt,t.lexema);
                         qtdParam = contaQtdParam();
@@ -863,27 +815,26 @@ void cmd(FILE*FD){
 
                                     if(t.cat == SINAL && t.codigo == FECHA_PAR){
                                         verificaQtdParam(qtdParam,contParam);
-                                        fprintf(FD1,"CALL %s\n",buscaLabelFunc(funcaoAt));
+                                        if(strcmp(buscaLabelFunc(funcaoAt,'f'),"\0") == 0){
+                                            fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcaoAt,'o'));
+                                        }
+                                        else{
+                                            fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcaoAt,'f'));
+                                        }
                                         Analex(FD);
                                         if(t.cat == SINAL && t.codigo == PTO_VIRGULA){
                                           Analex(FD);
                                             return;
                                         }else{
-                                          printf("Erro: ponto e virgula esperado na linha %d\n",contLinha);
-                                          system("pause");
-                                          exit(-84);
+                                          GerenciadorErros(PTOVIRG_ESPERADO);
                                         }
 
                                     }else{
-                                      printf("Erro: fecha parenteses esperado na linha %d\n",contLinha);
-                                      system("pause");
-                                      exit(-83);
+                                    GerenciadorErros(FECHAPAR_ESPERADO);
                                     }
 
                           }else{
-                            printf("Erro: abre parenteses esperado na linha %d\n",contLinha);
-                            //printf("\n %d %d",t.cat,t.codigo);
-                            system("pause");
+                            GerenciadorErros(ABREPAR_ESPERADO);
                             exit(-82);
                           }
                     }else if(tnext.cat == SINAL && tnext.codigo == IGUAL){
@@ -902,20 +853,13 @@ void cmd(FILE*FD){
                               Analex(FD);
                               return;
                             }else{
-                              printf("Erro: ponto e virgula esperado na linha %d\n",contLinha);
-                              system("pause");
-                              exit(-81);
+                              GerenciadorErros(PTOVIRG_ESPERADO);
                             }
                     }else{
-                      printf("Erro na linha %d\n",contLinha);
-                      system("pause");
-                      exit(-85);
+                    GerenciadorErros(ERRO_LINHA);
                     }
   }else{
-    printf("Erro na linha %d\n",contLinha);
-    printf("%d %d ",t.cat, t.codigo);
-    system("pause");
-    exit(-86);
+    GerenciadorErros(ERRO_LINHA);
   }
 }
 
@@ -926,10 +870,7 @@ int op_rel(FILE *FD){
         codigo = t.codigo;
         return codigo;
     }else{
-        printf("Erro na linha %d: Esperado sinal de op_rel",contLinha);
-        system("pause");
-        printf("%d %d ",t.cat, t.codigo);
-        exit(-50);
+      GerenciadorErros(OPREL_ESPERADO);
     }
 
 }
@@ -942,15 +883,11 @@ Analex(FD);
 
         tipo = expr(FD);
         if(tipo != caracter && tipo != inteiro && tipo != booleano && tipo != real){
-          printf("Erro na linha %d: Apenas variaveis dos tipos baicos podem receber atribuicoes",contLinha);
-          system("pause");
-          exit(-310);
+          GerenciadorErros(TIPOVAR_ATRIB);
         }
         return tipo;
     }else{
-        printf("Erro na linha %d: Esperado sinal igual",contLinha);
-        system("pause");
-        exit(-6);
+        GerenciadorErros(IGUAL_ESPERADO);
     }
 
 }
@@ -958,11 +895,9 @@ Analex(FD);
 int expr(FILE *FD){
   int primTipo = 0,segTipo = 0, operacao = 0;
   primTipo = expr_simp(FD);
-  printf("Expressoes\n PrimTipo: %d\n\n",primTipo);
   if((!(tnext.cat == SINAL && tnext.codigo == VIRGULA)) && (!(tnext.cat == SINAL && tnext.codigo == PTO_VIRGULA)) && (!(tnext.cat == SINAL && tnext.codigo == FECHA_PAR))){
    	operacao = op_rel(FD);
     segTipo = expr_simp(FD);
-    printf("Expressoes\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
     verCompatibilidade(primTipo,segTipo);
     codigo_oprel(operacao);
     primTipo = segTipo;
@@ -981,7 +916,6 @@ int expr_simp(FILE *FD){
   }
 
   primTipo = termo(FD);
-  printf("expr_simp\n PrimTipo: %d\n",primTipo);
   if(verificaOr()){
     strcpy(labelOr,label);
   }
@@ -995,7 +929,6 @@ int expr_simp(FILE *FD){
         fprintf(FD1,"POP\n");
     }
     segTipo = termo(FD);
-    printf("While de expr_simp \n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
     verCompatibilidade(primTipo,segTipo);
     if(codigo != OU){
         if(primTipo == CT_REAL){
@@ -1007,7 +940,6 @@ int expr_simp(FILE *FD){
     }
     primTipo = segTipo;
   }
-  printf("Retorno de expr_simp\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
   if (codigo == OU){
     fprintf(FD1,"LABEL %s\n", labelOr);
   }
@@ -1018,7 +950,6 @@ int termo(FILE *FD){
  int primTipo = 0,segTipo = 0, codigo = 0;
  char labelAnd[6];
  primTipo = fator(FD);
- printf("Termo\n PrimTipo: %d\n",primTipo);
 
   if(verificaAnd()){
     strcpy(labelAnd,label);
@@ -1032,7 +963,6 @@ int termo(FILE *FD){
         fprintf(FD1,"POP\n");
     }
     segTipo = fator(FD);
-    printf("While de Termo\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
     verCompatibilidade(primTipo,segTipo);
     if(codigo != E){
         if(primTipo == CT_REAL){
@@ -1044,7 +974,6 @@ int termo(FILE *FD){
     }
     primTipo = segTipo;
   }
-  printf("Retorno de Termo\n PrimTipo: %d, SegTipo: %d\n",primTipo,segTipo);
   if (codigo == E){
     fprintf(FD1,"LABEL %s\n", labelAnd);
   }
@@ -1062,9 +991,7 @@ int fator(FILE *FD){
       strcpy(funcAtl,t.lexema);
       tipo = tipoFunc(t.lexema);
       if(tipo == semretorno){
-        printf("Erro: a funcao foi declarada como semretorno na linha %d\n",contLinha);
-        system("pause");
-        exit(-351);
+        GerenciadorErros(FUNCAO_DECL_SEMRETORNO);
       }
       fprintf(FD1, "AMEM 1\n");
       Amem++;
@@ -1073,6 +1000,12 @@ int fator(FILE *FD){
           if(tnext.cat == SINAL && tnext.codigo == FECHA_PAR){
               Analex(FD);
               verificaQtdParam(qtdParam,contParam);
+                if(strcmp(buscaLabelFunc(funcAtl,'f'),"\0") == 0){
+                    fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl,'o'));
+                }
+                else{
+                    fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl,'f'));
+                }
             	return tipo;
           }else{
             param = expr(FD);
@@ -1093,12 +1026,15 @@ int fator(FILE *FD){
             }
             if(t.cat == SINAL && t.codigo == FECHA_PAR){
               verificaQtdParam(qtdParam,contParam);
-              fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl));
+                if(strcmp(buscaLabelFunc(funcAtl,'f'),"\0") == 0){
+                    fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl,'o'));
+                }
+                else{
+                    fprintf(FD1,"CALL %s\n", buscaLabelFunc(funcAtl,'f'));
+                }
               return tipo;
             }else{
-              printf("Fecha parenteses esperado\n");
-              system("pause");
-              exit(-30);
+              GerenciadorErros(FECHAPAR_ESPERADO);
             }
     }
     else{
@@ -1125,9 +1061,7 @@ int fator(FILE *FD){
       if((t.cat == SINAL) && (t.codigo == FECHA_PAR)){
         	return tipo;
       }else{
-        printf("Fecha parenteses esperado");
-       system("pause");
-       exit(-31);
+       GerenciadorErros(FECHAPAR_ESPERADO);
       }
 
   }else if((t.cat == SINAL) && (t.codigo == NEGACAO)){
@@ -1144,10 +1078,7 @@ int fator(FILE *FD){
     fprintf(FD1,"LABEL %s\n",labelneg1);
     return tipo;
   }else{
-    printf("Erro na linha %d \n",contLinha);
-    printf("\n%d %d",t.cat,t.codigo);
-    system("pause");
-    exit(-29);
+  GerenciadorErros(ERRO_LINHA);
   }
   return tipo;
 }
@@ -1156,6 +1087,7 @@ void Prog (FILE *FD){
 char labelFunc[6], pulaFunc[6];
 Analex(FD);
 Analex(FD);
+int temProt = 0;
 
 int contAmem = 0,AmemVarGlobal = 0;
 
@@ -1169,25 +1101,30 @@ fprintf(FD1,"INIP\n");
 			  if(t.cat == IDENTIFICADOR){
                    categoria_simb = 'v';
                    if (!(tnext.cat == SINAL && tnext.codigo == ABRE_PAR) && tipos == semretorno){
-                        printf("Erro na linha %d: Nao eh possivel declarar uma variavel semretorno\n",contLinha);
-                        system("pause");
-                        exit(-146);
+                        GerenciadorErros(VAR_SEMRETORNO);
                    }
                    if (tnext.cat == SINAL && tnext.codigo == ABRE_PAR){
                         categoria_simb = 'f';
                         criaLabel();
                         fprintf(FD1, "GOTO %s\n", label);
                         strcpy(pulaFunc,label);
-                        criaLabel();
-                        strcpy(labelFunc,label);
-                        fprintf(FD1,"LABEL %s\n",label);
                    }else{
                      contAmem++;
                    }
 
                    InsereTabela();
                    if(categoria_simb == 'f'){
-                     InsereLabelFunc(labelFunc);
+                        temProt = temPrototipo();
+                        if(temProt == -1){
+                            criaLabel();
+                            strcpy(labelFunc,label);
+                            InsereLabelFunc(labelFunc);
+                        }
+                        else{
+                            strcpy(labelFunc,buscaLabelFunc(t.lexema,'o'));
+                            InsereLabelFunc(labelFunc);
+                        }
+                        fprintf(FD1,"LABEL %s\n",labelFunc);
                    }
 			       Analex(FD);
 
@@ -1204,20 +1141,15 @@ fprintf(FD1,"INIP\n");
                                     }else if (t.cat == SINAL && t.codigo == PTO_VIRGULA){
                                       fprintf(FD1,"AMEM %d\n",contAmem);
                                         AmemVarGlobal = AmemVarGlobal + contAmem;
-                                      //  amemAdd = 0;
                                         contAmem = 0;
                                       Analex(FD);
                                       break;
                                     }else{
-                                      printf("ponto e virgula esperado na linha %d ",contLinha);
-                                      system("pause");
-                                      exit(-20);
+                                      GerenciadorErros(PTOVIRG_ESPERADO);
                                     }
-                                    }
+                                }
                                     else {
-                                      printf("Erro na linha %d. identificador esperado\n",contLinha);
-                                      system("pause");
-                                      exit(-30);
+                                      GerenciadorErros(ID_ESPERADO);
                                     }
 
 			                        }while(1);
@@ -1268,9 +1200,7 @@ fprintf(FD1,"INIP\n");
                                                                                                 contAmem = 0;
                                                                                                 break;
 																																													 		}else{
-																																														 			printf("ponto e virgula esperado na linha %d",contLinha);
-																																																	system("pause");
-																																																	exit(-13);
+                                                                                                  GerenciadorErros(PTOVIRG_ESPERADO);
 																																													 		}
 																																								 				}
 																																							 }while(1);
@@ -1279,20 +1209,17 @@ fprintf(FD1,"INIP\n");
                                                                     Amem = Amem + contAmem;
                                                                     contAmem = 0;
 																																	}else{
-																																		printf("Erro: Ponto e virgula esperado na linha %d",contLinha);
-																																		system("pause");
-																																		exit(-14);
+                                                                      GerenciadorErros(PTOVIRG_ESPERADO);
 																																	}
 
 									                                          }else{
-                                                              printf("ID esperado na linha %d ",contLinha);
-                                                              system("pause");
-                                                              exit(-90);
+                                                                GerenciadorErros(ID_ESPERADO);
                                                             }
 
 																											}else if(t.cat == SINAL && t.codigo == FECHA_CHAVE){
 																													escopo = 'g';
-                                                        fprintf(FD1,"DMEM %d\n",Amem);
+                                                        funcTopo();
+                                                        fprintf(FD1,"DMEM %d\n",contaQtdVarLocais(func_retorno));
                                                         Amem = 0;
                                                               fprintf(FD1, "RET 1,%d\n",contParametro);
                                                           contParametro = 0;
@@ -1308,25 +1235,17 @@ fprintf(FD1,"INIP\n");
 																								}
 
 			                                  }else{
-			                                   	printf("abre chave esperado na linha %d ",contLinha);
-																					system("pause");
-																					exit(-15);
+                                        GerenciadorErros(ABRECHAVE_ESPERADO);
 			                                  }
                           }else{
-                            printf("fecha par esperado na linha %d ",contLinha);
-                            system("pause");
-                            exit(-110);
+                            GerenciadorErros(FECHAPAR_ESPERADO);
                           }
 
 											}else{
-													printf("ponto e virgula esperado na linha %d ", contLinha);
-													system("pause");
-													exit(-17);
+                          GerenciadorErros(PTOVIRG_ESPERADO);
 											}
 								}else{
-									printf("ID esperado na linha %d ",contLinha);
-									system("pause");
-									exit(-2);
+                  GerenciadorErros(ID_ESPERADO);
 								}
 
                 SemRetorno = 0;
@@ -1338,6 +1257,8 @@ fprintf(FD1,"INIP\n");
                             if(t.cat == IDENTIFICADOR){
                                 categoria_simb = 'o';
                                   InsereTabela();
+                                  criaLabel();
+                                  InsereLabelFunc(label);
                                    Analex(FD);
                                     if (t.cat == SINAL && t.codigo == ABRE_PAR){
                                               tipos_p_opc(FD);
@@ -1368,82 +1289,53 @@ fprintf(FD1,"INIP\n");
                                                                           }else if (t.cat == SINAL && t.codigo == VIRGULA){
 
                                                                           }else{
-                                                                              printf("ponto e virgula esperado na linha %d",contLinha);
-                                                                              printf("\n %d %d\n",t.cat,t.codigo);
-                                                                              printf("\n %d %d\n",tnext.cat,tnext.codigo);
-                                                                              system("pause");
-                                                                              exit(-3);
+                                                                              GerenciadorErros(PTOVIRG_ESPERADO);
                                                                           }
                                                                     }else{
-                                                                      printf("fecha parenteses esperado na linha %d",contLinha);
-                                                                      system("pause");
-                                                                      exit(-112);
+                                                                      GerenciadorErros(FECHAPAR_ESPERADO);
                                                                     }
                                                             }else{
-                                                                printf("abre parenteses esperado na linha %d",contLinha);
-                                                                system("pause");
-                                                                exit(-4);
+                                                                GerenciadorErros(ABREPAR_ESPERADO);
                                                             }
                                                         }else if(t.cat == FIM_ARQ){
-                                                            printf("Erro na linha %d. Falta ponto e virgula ",contLinha);
-                                                            system("pause");
-                                                            exit(-111);
+                                                            GerenciadorErros(PTOVIRG_ESPERADO);
                                                         }else{
-                                                            printf("ID esperado na linha %d ",contLinha);
-                                                            system("pause");
-                                                            exit(-7);
+                                                            GerenciadorErros(ID_ESPERADO);
                                                         }
                                                     }
                                                   }else{
-                                                      printf("ponto e virgula esperado na linha %d",contLinha);
-																											system("pause");
-																											exit(-3);
+                                                      GerenciadorErros(PTOVIRG_ESPERADO);
                                                   }
 
                                     }else{
-                                      printf("fecha parenteses esperado na linha %d",contLinha);
-                                      system("pause");
-                                      exit(-111);
+                                      GerenciadorErros(FECHAPAR_ESPERADO);
                                     }
                                 }else{
-                                        printf("abre parenteses esperado na linha %d",contLinha);
-																				system("pause");
-																				exit(-4);
+                                        GerenciadorErros(ABREPAR_ESPERADO);
                                 }
 
 
                            }else{
-                          		printf("ID esperado na linha %d ",contLinha);
-															system("pause");
-															exit(-7);
+                              GerenciadorErros(ID_ESPERADO);
                           }
 
                 }else{
-									printf("Erro na linha %d ",contLinha);
-									system("pause");
-									exit(-8);
+                  GerenciadorErros(ERRO_LINHA);
                 }
           }else if(t.cat == SINAL && t.codigo == FECHA_CHAVE){
             Analex(FD);
             //TERMINO DA FUNCAO
             if(t.cat == SINAL && t.codigo == FECHA_CHAVE){
-                printf("Erro na linha %d: Fecha chave solto\n",contLinha);
-                printf("\n %d %d",t.cat,t.codigo);
-                system("pause");
-                exit(-110);
+                GerenciadorErros(FECHACHAVE_SOLTO);
             }
 					}else{
-							printf("Erro na linha %d ",contLinha);
-							printf("\n %d %d",t.cat,t.codigo);
-							system("pause");
-							exit(-9);
+              GerenciadorErros(ERRO_LINHA);
 					}
-
 
 	}while(t.cat != 6); //Fim Arquivo
 
   procuraPrincipal();
-  fprintf(FD1,"CALL %s\n", buscaLabelFunc("principal"));
+  fprintf(FD1,"CALL %s\n", buscaLabelFunc("principal",'f'));
   fprintf(FD1,"DMEM %d\n",AmemVarGlobal);
   fprintf(FD1,"HALT\n");
 	return;
