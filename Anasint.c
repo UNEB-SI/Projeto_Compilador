@@ -498,7 +498,7 @@ prototipo = temPrototipo();
 																	}else{
                                     contParametro = contParam;
                                     contParam = contParam + prototipo + 1;
-                                      if(tabela_s[contParam].categoria == 'r'){
+                                      if(tabela_s[contParam].categoria == 'r' && prototipo != -1){
                                         GerenciadorErros(QTDPARAM_INCOMPATIVEL);
                                       }
                                       fprintf(FD1,"AMEM %d\n",contAmem);
