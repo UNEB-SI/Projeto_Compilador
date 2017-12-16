@@ -26,7 +26,7 @@ char * selecao_completa();
 void criaLabel();
 int verificaAnd();
 int verificaOr();
-char * buscaLabelFunc(char []);
+char * buscaLabelFunc(char [],char);
 void InsereLabelFunc(char[]);
 void codigo_oprel(int );
 void endRelativo(char []);
